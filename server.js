@@ -5,7 +5,7 @@ const API = require("call-of-duty-api")()
 require("dotenv").config()
 ;(async () => {
   try {
-    await API.login("korchev1994@gmail.com", "ivailo94")
+    await API.login(process.env.EMAIL, process.env.PASSWORD)
   } catch (err) {
     console.log(err)
   }
