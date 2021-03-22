@@ -14,7 +14,7 @@ require("dotenv").config()
 const getData = async (user, platform) => {
   let data
   try {
-    data = await API.MWweeklystats(user, platform)
+    data = await API.MWwz(user, platform)
   } catch (error) {
     console.log(error)
   }

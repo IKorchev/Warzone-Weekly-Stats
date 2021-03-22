@@ -2,7 +2,8 @@ const form = document.querySelector("form")
 const user = document.querySelector("#username")
 const usernumber = document.querySelector("#usernumber")
 const plat = document.querySelector("#plat")
-const contentContainer = document.querySelector(".content-container")
+const weeklyStatsContainer = document.querySelector("#weekly-stats")
+const allTimeStatsContainer = document.querySelector("#all-time-stats")
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
@@ -19,80 +20,72 @@ form.addEventListener("submit", async (e) => {
     })
     const data = await response.json()
     console.log(data)
-    formatData(data, fullUserID)
+    const allTimeStats = data.lifetime.mode.br_all.properties
+    const weeklyStats = data.weekly.mode.br_all.properties
+    formatAllTimeData(data, allTimeStatsContainer)
   } catch (err) {
     throw Error(err)
   }
 })
 
-const formatData = (data, name) => {
-  let player = data.wz.all.properties
-  let html = ""
+const makeLocaleString = (n) => {
+  return n.toLocaleString("en-UK")
+}
+const formatWeeklyData = () => {}
 
+const formatAllTimeData = (data, container) => {
+  let html = ""
+  const d = data.lifetime.mode.br_all.properties
   html += `
   <div class="card">
-    <div class="card-header">
-        <h1 class="h3 name text-center">${name}</h1>
-        <h2 class="h5 text-center">Matches played: ${player.matchesPlayed} </h2>
+    <div class="card-header my-3 d-flex justify-content-around">
+      <h5 class="text-uppercase">
+        <i class="bi bi-person"></i>
+        ${data.username}</h5>
+      <h5> Level: ${data.level}</h5>
+      <h5>
+        <i class="bi bi-trophy"></i>
+        WINS: ${makeLocaleString(d.wins)}
+      </h5>
     </div>
-    <div class="card-body d-flex flex-column justify-content-center align-items-between">
-        <div class="row justify-content-around">
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Kills</h5>
-                <h5 class="text-center">${player.kills}</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Deaths</h5>
-                <h5 class="text-center">${player.deaths}</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Assists</h5>
-                <h5 class="text-center">${player.assists}</h5>
-            </div>
+    <div class="card-body row">
+        <div class="col text-center">
+            <h6>Total Kills</h6>
+            <h6>${makeLocaleString(d.kills)}</h6>
         </div>
-        <div class="row mt-3 justify-content-around">
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Headshots</h5>
-                <h5 class="text-center">${player.headshots}</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Damage Done</h5>
-                <h5 class="text-center">${player.damageDone}</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Damage Taken</h5>
-                <h5 class="text-center">${player.damageTaken}</h5>
-            </div>
+        <div class="col text-center">
+            <h6>Total Deaths</h6>
+            <h6>${makeLocaleString(d.deaths)}</h6>
         </div>
-        <div class="row justify-content-around mt-3">
-            <h3 class="h5 text-center mb-3">Average:</h3>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Kills per game</h5>
-                <h5 class="text-center">${player.killsPerGame.toFixed(2)}</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Lifetime</h5>
-                <h5 class="text-center">${(player.avgLifeTime / 60).toFixed(
-                  2
-                )} minutes</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Score per minute</h5>
-                <h5 class="text-center">${player.scorePerMinute.toFixed(2)}</h5>
-            </div>
+        <div class="col text-center">
+            <h6>Total Revives</h6>
+            <h6>${makeLocaleString(d.revives)}</h6>
         </div>
-        <div class="row justify-content-around mt-3">
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">KD Ratio</h5>
-                <h5 class="text-center">${player.kdRatio.toFixed(2)}</h5>
-            </div>
-            <div class="col-3 mt-2 d-flex flex-column justify-content-center border border-info">
-                <h5 class="text-center">Headshots %</h5>
-                <h5 class="text-center">${player.headshotPercentage.toFixed(2)}</h5>
-            </div>
+        <div class="col text-center">
+          <h6>Total Downs</h6>
+          <h6>${makeLocaleString(d.downs)}</h6>
         </div>
     </div>
-</div>`
-
-  contentContainer.innerHTML = html
+    <div class="card-body row">
+    <div class="col text-center">
+        <h6>Games Played</h6>
+        <h6>${makeLocaleString(d.gamesPlayed)}</h6>
+    </div>
+    <div class="col text-center">
+        <h6>Time Played</h6>
+        <h6>${(d.timePlayed / 3600).toFixed(2)} hours</h6>
+    </div>
+    <div class="col text-center">
+      <h6>Total Score</h6>
+      <h6>${makeLocaleString(d.score)}</h6>
+    </div>
+    <div class="col text-center">
+        <h6>Score per minute</h6>
+        <h6>${d.scorePerMinute.toFixed()}</h6>
+    </div>
+    
+  </div>
+</div>
+  `
+  container.innerHTML = html
 }
