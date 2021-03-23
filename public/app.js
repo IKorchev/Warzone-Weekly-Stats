@@ -1,3 +1,4 @@
+// SELECTORS
 const form = document.querySelector("form")
 const user = document.querySelector("#username")
 const usernumber = document.querySelector("#usernumber")
@@ -7,153 +8,129 @@ const allTimeStatsContainer = document.querySelector("#all-time-stats")
 const playerContainer = document.querySelector("#player-container")
 const weeklyCollapse = document.getElementById("collapseOne")
 const accordion = document.querySelector(".accordion")
-const alert = document.querySelector(".alert")
-console.log(alert)
+
+// collapsible
 const collapse = new bootstrap.Collapse(weeklyCollapse, {
   toggle: false,
 })
+// SPINNER HTML
+const spinnerHTML = `
+  <div class="spinner-border text-info mt-5" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>`
+
+// ON FORM SUBMISSION
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
-  playerContainer.innerHTML = `<div class="spinner-border text-info mt-5" role="status">
-  <span class="visually-hidden">Loading...</span>
-</div>`
-  const fullUserID = `${user.value}#${usernumber.value}`
   const userandplat = {
-    user: fullUserID,
+    user: `${user.value}#${usernumber.value}`,
     platform: plat.value,
   }
+  playerContainer.innerHTML = spinnerHTML
   try {
-    const response = await fetch(`/send`, {
+    // FETCH OPTIONS
+    const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userandplat),
-    })
+    }
+    // FETCH DATA FROM API
+    const response = await fetch(`/send`, options)
     const data = await response.json()
-    console.log(data)
-    const allTimeStats = data.lifetime.mode.br_all.properties
-    const weeklyStats = data.weekly.mode.br_all.properties
-    const lifetime = data.lifetime.all.properties
-    // prettier-ignore
-    playerContainer.innerHTML = `
-    <h5 class="player text-center border border-info text-uppercase"><i class="bi bi-person"></i> ${data.username}</h5>
-    <h5 class="player text-center border border-info">Level: ${data.level}</h5>
-    <h5 class="player text-center border border-info"><i class="bi bi-trophy"></i> Wins: ${makeLocaleString(lifetime.wins)} </h5>`
-    formatAllTimeData(data, allTimeStatsContainer)
-    formatWeeklyData(data, weeklyStatsContainer)
+    setupUI(data) // set up the ui based on data received
   } catch (err) {
-    playerContainer.innerHTML = `
-    <div class="alert alert-danger mt-5 mx-auto">
-      <h5 class="text-center ">Unable to find user (misconfigured privacy settings)</h5>
-    </div>`
-    console.log(alert)
-    // throw Error(err)
+    setupUI() // set up the ui based on data received
   } finally {
-    collapse.show()
-    accordion.classList.remove("visually-hidden")
+    form.reset() 
   }
-  form.reset()
 })
 
-const showAlert = (selector, ms) => {
-  selector.classList.remove("visually-hidden")
-  setTimeout(() => {
-    selector.classList.add("visually-hidden")
-  }, ms)
-}
-const makeLocaleString = (n) => {
-  return n.toLocaleString("en-UK")
-}
-const formatWeeklyData = (data, container) => {
-  const d = data.weekly.all.properties
-  const wins = d.wins || 0
-  let html = ""
-  html += `
-  <div class="card">
-    <div class="card-header my-3 d-flex justify-content-around">
-      <h5 class="text-uppercase">WEEKLY STATS</h5>
-    </div>
-    <div class="card-body row">
-        <div class="col text-center">
-            <h6>Matches played</h6>
-            <h6>${makeLocaleString(d.matchesPlayed)}</h6>
-        </div>
-        <div class="col text-center">
-          <h6>Total Kills</h6>
-          <h6>${makeLocaleString(d.kills)}</h6>
-        </div>
-        <div class="col text-center">
-            <h6>Total Deaths</h6>
-            <h6>${makeLocaleString(d.deaths)}</h6>
-        </div>
-       
-        <div class="col text-center">
-          <h6>Damage Done</h6>
-          <h6>${makeLocaleString(d.damageDone)}</h6>
-        </div>
-    </div>
-    <div class="card-body row">
-    <div class="col text-center">
-        <h6>Headshots</h6>
-        <h6>${makeLocaleString(d.headshots)}</h6>
-    </div>
-    <div class="col text-center">
-        <h6>Headshot %</h6>
-        <h6>${d.headshotPercentage.toFixed(2)}%</h6>
-    </div>
-    <div class="col text-center">
-      <h6> KD Ratio</h6>
-      <h6>${makeLocaleString(d.kdRatio.toFixed())}</h6>
-    </div>
-    <div class="col text-center">
-        <h6>Time Played</h6>
-        <h6>${(d.timePlayed / 3600).toFixed()} hours</h6>
-    </div>
-    
-  </div>
-</div>`
-  container.innerHTML = html
+// MAKE CARDS FROM USER STATS
+const makeStatsCard = (data, WeeklyOrAlltime) => {
+  const lifetime = data.lifetime.all.properties
+  const weekly = data.weekly.all.properties
+  // PLAYER ALL TIME DATA
+  const allTimeStats = [
+    [
+      { name: "Kills", number: lifetime.kills },
+      { name: "Deaths", number: lifetime.deaths },
+      { name: "Assists", number: lifetime.assists },
+      { name: "KD Ratio", number: lifetime.kdRatio.toFixed(2) },
+    ],
+    [
+      { name: "Games Played", number: lifetime.gamesPlayed },
+      { name: "Wins", number: lifetime.wins },
+      { name: "Losses", number: lifetime.losses },
+      { name: "Win/Loss Ratio", number: lifetime.wlRatio.toFixed(2) },
+    ],
+  ]
+  // PLAYER WEEKLY DATA
+  const weeklyStats = [
+    [
+      { name: "Kills", number: weekly.kills },
+      { name: "Deaths", number: weekly.deaths },
+      { name: "Assists", number: weekly.assists },
+      { name: "KD Ratio", number: weekly.kdRatio.toFixed(2) },
+    ],
+    [
+      { name: "Games Played", number: weekly.matchesPlayed },
+      { name: "Wins", number: weekly.wins || 0 },
+      { name: "Losses", number: weekly.matchesPlayed - (weekly.wins || 0) },
+      { name: "Time played", number: `${(weekly.timePlayed / 3600).toFixed(2)} hours` },
+    ],
+  ]
+
+  // RETURN VALUE AS NEEDED
+  if (WeeklyOrAlltime === "weekly") {
+    return makeRows(weeklyStats)
+  } else if (WeeklyOrAlltime === "alltime") {
+    return makeRows(allTimeStats)
+  }
 }
 
-const formatAllTimeData = (data, container) => {
-  let html = ""
-  let da = data.lifetime.all.properties
-  const d = data.lifetime.mode.br_all.properties
-  html += `
-  <div class="card">
-    <div class="card-header my-3 d-flex justify-content-around">
-      <h5>ALL TIME STATS</h5>
-    </div>
-    <div class="card-body row">
-        <div class="col text-center">
-            <h6>Total Kills</h6>
-            <h6>${makeLocaleString(da.kills)}</h6>
-        </div>
-        <div class="col text-center">
-            <h6>Total Deaths</h6>
-            <h6>${makeLocaleString(da.deaths)}</h6>
-        </div>
-        <div class="col text-center">
-          <h6>KD Ratio</h6>
-          <h6>${makeLocaleString(da.kdRatio.toFixed(2))}</h6>
-        </div>
-    </div>
-    <div class="card-body row">
-    <div class="col text-center">
-        <h6>Games Played</h6>
-        <h6>${makeLocaleString(da.gamesPlayed)}</h6>
-    </div>
-    <div class="col text-center">
-        <h6>Time Played</h6>
-        <h6>${(da.timePlayedTotal / 60).toFixed(2)} hours</h6>
-    </div>
-    <div class="col text-center">
-      <h6>Total Score</h6>
-      <h6>${makeLocaleString(da.score)}</h6>
-    </div>
-    <div class="card-body row">
-    </div>
-  </div>
-</div>
-  `
-  container.innerHTML = html
+// WRAP EVERY ARRAY OF OBJECTS IN A DIV (ROW)
+
+const makeRows = (arr) => {
+  let wrappedArr = ""
+  // prettier-ignore
+  arr.forEach(array => { 
+    let myItem = array.map(item => `<div class="col text-center"><h6>${item.name}</h6><h6>${item.number}</h6></div>`)
+    wrappedArr += `<div class="card-body row">${myItem}</div>`
+  })
+  const html = wrappedArr.split(",").join(" ")
+  return html
+}
+
+// DISPLAY USER OR ALERT
+// prettier-ignore
+const setUserHtml = (user) => {
+  if(Object.keys(user) != 0) {
+ return `<h5 class="player text-center border border-info text-uppercase"><i class="bi bi-person"></i> ${user.username}</h5>
+  <h5 class="player text-center border border-info">Level: ${user.level}</h5>
+  <h5 class="player text-center border border-info"><i class="bi bi-trophy"></i> Wins: ${user.wins.toLocaleString("en-UK") || 0} </h5>`
+} else {
+  return `<div class="alert alert-danger mt-5 mx-auto">
+      <h5 class="text-center ">Unable to find user (misconfigured privacy settings)</h5>
+    </div>`
+}}
+
+// UI
+const setupUI = (data) => {
+  let playerInfo = {}
+  if (data) {
+    playerInfo = {
+      username: data.username,
+      level: data.level,
+      wins: data.lifetime.all.properties.wins.toLocaleString("en-UK"),
+    }
+    accordion.classList.remove("visually-hidden")
+    allTimeStatsContainer.innerHTML = makeStatsCard(data, "alltime")
+    weeklyStatsContainer.innerHTML = makeStatsCard(data, "weekly")
+    playerContainer.innerHTML = setUserHtml(playerInfo)
+    collapse.show()
+  } else {
+    accordion.classList.add("visually-hidden")
+    playerContainer.innerHTML = setUserHtml(playerInfo)
+    collapse.hide()
+  }
 }

@@ -48,20 +48,6 @@
     <div class="container content-container d-flex justify-content-center mt-5">
         <div class="accordion w-100 visually-hidden" id="an-accordion">
             <div class="accordion-item">
-                <h2 class="accordion-header bg-dark" id="headingOne">
-                    <button class="accordion-button text-white d-block" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        <h5>Weekly stats</h5>
-                    </button>
-                </h2>
-                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-                    data-bs-parent="#an-accordion">
-                    <div class="accordion-body text-white" id="weekly-stats">
-                        <!-- Weekly stats go here -->
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
                 <h2 class="accordion-header bg-dark " id="headingTwo">
                     <button class="accordion-button text-white collapsed" type="button" data-bs-toggle="collapse"
                         data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -70,12 +56,39 @@
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                     data-bs-parent="#an-accordion">
-                    <div class="accordion-body text-white" id="all-time-stats">
-                        <!-- All time stats go here -->
+                    <div class="accordion-body text-white">
+                        <div class="card">
+                            <div class="card-header my-3 d-flex justify-content-around">
+                                <h5>ALL TIME STATS</h5>
+                            </div>
+                            <div id="all-time-stats">
+                                <!-- All time stats go here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
+            <div class="accordion-item">
+                <h2 class="accordion-header bg-dark" id="headingOne">
+                    <button class="accordion-button text-white d-block" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <h5>Weekly stats</h5>
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                    data-bs-parent="#an-accordion">
+                    <div class="accordion-body text-white">
+                        <div class="card">
+                            <div class="card-header my-3 d-flex justify-content-around">
+                                <h5>WEEKLY STATS</h5>
+                            </div>
+                            <div id="weekly-stats">
+                                <!-- Weekly stats go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
