@@ -2,12 +2,29 @@
 const form = document.querySelector("form")
 const user = document.querySelector("#username")
 const usernumber = document.querySelector("#usernumber")
+const compare = document.querySelector("#compare")
 const plat = document.querySelector("#plat")
 const weeklyStatsContainer = document.querySelector("#weekly-stats")
 const allTimeStatsContainer = document.querySelector("#all-time-stats")
 const playerContainer = document.querySelector("#player-container")
 const weeklyCollapse = document.getElementById("collapseOne")
 const accordion = document.querySelector(".accordion")
+
+compare.addEventListener("click", async (e) => {
+  e.preventDefault()
+  try {
+    const name = playerContainer.firstChild.textContent.replace("#", "%23")
+    const res = await fetch(`/compare/${name}`)
+    const data = await res.json()
+    changeUI(data)
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+const changeUI = (data) => {
+  console.log(` You had `)
+}
 
 // collapsible
 const collapse = new bootstrap.Collapse(weeklyCollapse, {
@@ -22,33 +39,29 @@ const spinnerHTML = `
 // ON FORM SUBMISSION
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
-  const userandplat = {
-    user: `${user.value}#${usernumber.value}`,
-    platform: plat.value,
-  }
+  // send user info to server to make the api call
+  const player = `${user.value}%23${usernumber.value}`
+  const platform = plat.value
   playerContainer.innerHTML = spinnerHTML
   try {
-    // FETCH OPTIONS
-    const options = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userandplat),
-    }
     // FETCH DATA FROM API
-    const response = await fetch(`/send`, options)
+    const response = await fetch(`/send/${player},${platform}`, { method: "post" })
     const data = await response.json()
-    setupUI(data) // set up the ui based on data received
+    console.log(data)
+    setupUI(data) // set up the ui
+    console.log(playerContainer.firstChild.textContent)
   } catch (err) {
-    setupUI() // set up the ui based on data received
+    setupUI()
+    console.log(err) // set up the ui
   } finally {
-    form.reset() 
+    form.reset()
   }
 })
 
 // MAKE CARDS FROM USER STATS
-const makeStatsCard = (data, WeeklyOrAlltime) => {
-  const lifetime = data.lifetime.all.properties
-  const weekly = data.weekly.all.properties
+const makeStatsCard = (data, weeklyOrAlltime) => {
+  const weekly = data.weekly
+  const lifetime = data.lifetime
   // PLAYER ALL TIME DATA
   const allTimeStats = [
     [
@@ -61,7 +74,6 @@ const makeStatsCard = (data, WeeklyOrAlltime) => {
       { name: "Games Played", number: lifetime.gamesPlayed },
       { name: "Wins", number: lifetime.wins },
       { name: "Losses", number: lifetime.losses },
-      { name: "Win/Loss Ratio", number: lifetime.wlRatio.toFixed(2) },
     ],
   ]
   // PLAYER WEEKLY DATA
@@ -73,17 +85,16 @@ const makeStatsCard = (data, WeeklyOrAlltime) => {
       { name: "KD Ratio", number: weekly.kdRatio.toFixed(2) },
     ],
     [
-      { name: "Games Played", number: weekly.matchesPlayed },
+      { name: "Games Played", number: weekly.gamesPlayed },
       { name: "Wins", number: weekly.wins || 0 },
-      { name: "Losses", number: weekly.matchesPlayed - (weekly.wins || 0) },
       { name: "Time played", number: `${(weekly.timePlayed / 3600).toFixed(2)} hours` },
     ],
   ]
 
   // RETURN VALUE AS NEEDED
-  if (WeeklyOrAlltime === "weekly") {
+  if (weeklyOrAlltime === "weekly") {
     return makeRows(weeklyStats)
-  } else if (WeeklyOrAlltime === "alltime") {
+  } else if (weeklyOrAlltime === "alltime") {
     return makeRows(allTimeStats)
   }
 }
@@ -105,7 +116,7 @@ const makeRows = (arr) => {
 // prettier-ignore
 const setUserHtml = (user) => {
   if(Object.keys(user) != 0) {
- return `<h5 class="player text-center border border-info text-uppercase"><i class="bi bi-person"></i> ${user.username}</h5>
+ return `<h5 class="player text-center border border-info text-uppercase"><i class="bi bi-person"></i>${user.username}</h5>
   <h5 class="player text-center border border-info">Level: ${user.level}</h5>
   <h5 class="player text-center border border-info"><i class="bi bi-trophy"></i> Wins: ${user.wins.toLocaleString("en-UK") || 0} </h5>`
 } else {
@@ -121,7 +132,7 @@ const setupUI = (data) => {
     playerInfo = {
       username: data.username,
       level: data.level,
-      wins: data.lifetime.all.properties.wins.toLocaleString("en-UK"),
+      wins: data.lifetime.wins,
     }
     accordion.classList.remove("visually-hidden")
     allTimeStatsContainer.innerHTML = makeStatsCard(data, "alltime")

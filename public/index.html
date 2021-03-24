@@ -21,10 +21,10 @@
     <div class="container mx-auto">
         <form action="/send" class="d-flex flex-column flex-lg-row justify-content-center mx-auto" method="POST">
             <div class="col-lg-4 d-flex justify-content-center">
-                <input type="text" class="form-control text-white bg-dark" id="username" placeholder="Username"
+                <input type="text" class="form-control text-white bg-dark" name="name"id="username" placeholder="Username"
                     aria-label="Username">
                 <span class="input-group-text bg-dark text-white">#</span>
-                <input type="text" class="form-control text-white bg-dark" id="usernumber" placeholder="ID"
+                <input type="text" class="form-control text-white bg-dark" name="number" id="usernumber" placeholder="ID"
                     aria-label="Server">
             </div>
             <div class="col-lg-1 d-flex justify-content-center">
@@ -45,6 +45,7 @@
     <div class="row w-50 mx-auto gx-0 mt-5 justify-content-center align-items-center text-white" id="player-container">
 
     </div>
+    <button class="btn btn-secondary" id="compare">Compare last weeks stats</button>
     <div class="container content-container d-flex justify-content-center mt-5">
         <div class="accordion w-100 visually-hidden" id="an-accordion">
             <div class="accordion-item">
