@@ -3,13 +3,14 @@ const form = document.querySelector("form")
 const user = document.querySelector("#username")
 const usernumber = document.querySelector("#usernumber")
 const compare = document.querySelector("#compare")
+const saveButton = document.querySelector("#save")
 const plat = document.querySelector("#plat")
 const weeklyStatsContainer = document.querySelector("#weekly-stats")
 const allTimeStatsContainer = document.querySelector("#all-time-stats")
 const playerContainer = document.querySelector("#player-container")
 const weeklyCollapse = document.getElementById("collapseOne")
 const accordion = document.querySelector(".accordion")
-
+let platform = ""
 compare.addEventListener("click", async (e) => {
   e.preventDefault()
   const platform = "battle"
@@ -19,34 +20,81 @@ compare.addEventListener("click", async (e) => {
     const cod_data = await cod_res.json()
     const db_res = await fetch(`/compare/${name}`)
     const db_data = await db_res.json()
-    const allData = [cod_data.weekly, db_data]
-    changeUI(allData)
+    changeUI(cod_data.weekly, db_data)
   } catch (err) {
-    console.log(err)
+    changeUI()
   }
+})
+
+saveButton.addEventListener("click", async (e) => {
+  e.preventDefault()
+  const name = playerContainer.firstChild.textContent.replace("#", "%23")
+  const platform = "battle"
+
+  const response = await fetch(`/update/${name},${platform}`, { method: "POST" })
+  console.log(await response.json())
 })
 // TODO: Change the UI based on the data comparison
 // Show the user what changed since last time he checked his data
-const changeUI = (data) => {
-  const cod = Object.values(data[0])
-  const db = Object.values(data[1]).splice(2, 7)
-  cod.forEach((item1, index1) => {
-    db.forEach((item2, index2) => {
-      if (index1 === index2) {
-        if (item1 > item2) {
-          console.log(`${item1} > ${item2}`)
-        } else if ((item1 = item2)) {
-          console.log(`${item1} = ${item2}`)
-        } else {
-          console.log(`${item1} < ${item2}`)
-        }
+const changeUI = (cod, db) => {
+  if (cod && db) {
+    const chooseColor = (num1, num2) => {
+      if (num1 > num2) {
+        return "text-success"
       }
+      if (num1 < num2) {
+        return "text-danger"
+      }
+      if (num1 === num2) {
+        return "text-light"
+      }
+    }
+    const codStats = [
+      {
+        name: "Kills",
+        number: db.kills,
+        color: chooseColor(db.kills, cod.kills),
+      },
+      {
+        name: "Deaths",
+        number: db.deaths,
+        color: chooseColor(db.deaths, cod.deaths),
+      },
+      {
+        name: "Assists",
+        number: db.assists,
+        color: chooseColor(db.assists, cod.assists),
+      },
+      {
+        name: "KD Ratio",
+        number: cod.kdRatio.toFixed(2),
+        color: chooseColor(db.kdRatio, cod.kdRatio),
+      },
+      {
+        name: "Games Played",
+        number: cod.gamesPlayed,
+        color: chooseColor(db.gamesPlayed, cod.gamesPlayed),
+      },
+      { name: "Wins", number: db.wins || 0, color: chooseColor(db.wins, cod.wins) },
+      {
+        name: "Time played",
+        number: `${(db.timePlayed / 3600).toFixed(2)} hours`,
+        color: chooseColor(db.timePlayed, cod.timePlayed),
+      },
+    ]
+    let html = ""
+    codStats.forEach((object) => {
+      html += `<div class="col"><h5>${object.name}</h5>
+    <h5 class="${object.color}">${object.number}</h5>
+    </div>`
     })
-  })
+
+    playerContainer.innerHTML = ` <div class="row">${html}</div>`
+  } else {
+    playerContainer.innerHTML = `<h5> Couldn't find enough data </h5>`
+  }
 }
 
-const compareData = (cod, db) => {}
-console.log(compareData(5, 6))
 // collapsible
 const collapse = new bootstrap.Collapse(weeklyCollapse, {
   toggle: false,
@@ -62,7 +110,7 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault()
   // send user info to server to make the api call
   const player = `${user.value}%23${usernumber.value}`
-  const platform = plat.value
+  platform = plat.value
   playerContainer.innerHTML = spinnerHTML
   try {
     // FETCH DATA FROM API
