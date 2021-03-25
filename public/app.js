@@ -12,20 +12,41 @@ const accordion = document.querySelector(".accordion")
 
 compare.addEventListener("click", async (e) => {
   e.preventDefault()
+  const platform = "battle"
   try {
     const name = playerContainer.firstChild.textContent.replace("#", "%23")
-    const res = await fetch(`/compare/${name}`)
-    const data = await res.json()
-    changeUI(data)
+    const cod_res = await fetch(`/send/${name},${platform}`, { method: "post" })
+    const cod_data = await cod_res.json()
+    const db_res = await fetch(`/compare/${name}`)
+    const db_data = await db_res.json()
+    const allData = [cod_data.weekly, db_data]
+    changeUI(allData)
   } catch (err) {
     console.log(err)
   }
 })
-
+// TODO: Change the UI based on the data comparison
+// Show the user what changed since last time he checked his data
 const changeUI = (data) => {
-  console.log(` You had `)
+  const cod = Object.values(data[0])
+  const db = Object.values(data[1]).splice(2, 7)
+  cod.forEach((item1, index1) => {
+    db.forEach((item2, index2) => {
+      if (index1 === index2) {
+        if (item1 > item2) {
+          console.log(`${item1} > ${item2}`)
+        } else if ((item1 = item2)) {
+          console.log(`${item1} = ${item2}`)
+        } else {
+          console.log(`${item1} < ${item2}`)
+        }
+      }
+    })
+  })
 }
 
+const compareData = (cod, db) => {}
+console.log(compareData(5, 6))
 // collapsible
 const collapse = new bootstrap.Collapse(weeklyCollapse, {
   toggle: false,
