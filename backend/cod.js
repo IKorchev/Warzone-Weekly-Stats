@@ -14,7 +14,7 @@ const getData = async (user, platform) => {
     data = await API.MWwz(user, platform)
     // console.log(data)
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
   return data
 }
