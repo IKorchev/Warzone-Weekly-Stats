@@ -8,7 +8,7 @@ const userData = new Schema({
   deaths: { type: Number },
   assists: { type: Number },
   kdRatio: { type: Number },
-  gamesPlayed: { type: Number },
+  matchesPlayed: { type: Number },
   timePlayed: { type: Number },
 })
 

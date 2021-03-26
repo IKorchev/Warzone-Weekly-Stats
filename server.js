@@ -14,78 +14,69 @@ db.on("error", () => console.log("couldnt connect"))
 db.once("open", () => {
   console.log("we are connected")
 })
-app.get("/compare/:name", async (req, res) => {
-  User.findOne({ username: req.params.name }, (err, player) => {
-    if (player !== null) {
-      res.send(player)
-    } else {
-      res.send(null)
+app.post("/compare/:name", async (req, res) => {
+  try {
+    COD.login()
+    const player = req.params.name.split(",")
+    const data = await COD.getData(player[0], player[1])
+    const ws = data.weekly.all.properties
+    const cod_data = {
+      username: data.username,
+      wins: ws.wins || 0,
+      kills: ws.kills,
+      deaths: ws.deaths,
+      assists: ws.assists,
+      kdRatio: ws.kdRatio,
+      matchesPlayed: ws.matchesPlayed,
+      timePlayed: ws.timePlayed,
     }
-  })
+    User.findOne({ username: player[0] }, (err, db_data) => {
+      if (player) {
+        res.json([cod_data, db_data])
+      } else {
+        updateUser(player[0], player[1])
+        res.json([cod_data, cod_data])
+      }
+    })
+  } catch (err) {
+    console.log(err)
+  }
 })
 
 app.post("/update/:playername", async (req, res) => {
-  const player = req.params.playername.split(",")
-  const data = await COD.getData(player[0], player[1])
-  const ws = data.weekly.all.properties
-  const as = data.lifetime.all.properties
-
-  const userDataNeeded = {
-    username: data.username,
-    level: data.level,
-    wins: as.wins || 0,
-    weekly: {
-      wins: ws.wins || 0,
-      kills: ws.kills,
-      deaths: ws.deaths,
-      assists: ws.assists,
-      kdRatio: ws.kdRatio,
-      gamesPlayed: ws.matchesPlayed,
-      timePlayed: ws.timePlayed,
-    },
+  try {
+    const player = req.params.playername.split(",")
+    updateUser(player[0], player[1])
+    res.send("data updated")
+  } catch (err) {
+    res.send("unable to update")
   }
-  User.findOneAndReplace({ username: player[0] }, userDataNeeded, {}, (err, doc) => {
-    console.log(doc)
-  })
-  res.json(req.params.playername)
 })
-app.post("/send/:userinfo", async (req, res) => {
-  const player = req.params.userinfo.split(",")
-  const data = await COD.getData(player[0], player[1])
-  const ws = data.weekly.all.properties
-  const as = data.lifetime.all.properties
 
-  const userDataNeeded = {
+const updateUser = async (player, platform) => {
+  COD.login()
+  const data = await COD.getData(player, platform)
+  console.log(data)
+  const ws = data.weekly.all.properties
+  const db_player = {
     username: data.username,
-    level: data.level,
-    wins: as.wins || 0,
-    weekly: {
-      wins: ws.wins || 0,
-      kills: ws.kills,
-      deaths: ws.deaths,
-      assists: ws.assists,
-      kdRatio: ws.kdRatio,
-      gamesPlayed: ws.matchesPlayed,
-      timePlayed: ws.timePlayed,
-    },
-    lifetime: {
-      wins: as.wins || 0,
-      kills: as.kills,
-      deaths: as.deaths,
-      assists: as.assists,
-      kdRatio: as.kdRatio,
-      gamesPlayed: as.gamesPlayed,
-      timePlayed: as.timePlayed,
-      losses: as.losses,
-    },
+    wins: ws.wins || 0,
+    kills: ws.kills,
+    deaths: ws.deaths,
+    assists: ws.assists,
+    kdRatio: ws.kdRatio,
+    matchesPlayed: ws.matchesPlayed,
+    timePlayed: ws.timePlayed,
   }
   // create user in the database in
   // order to make a comparison later
-  User.create(userDataNeeded).then((data) => {
-    console.log(data)
-  })
-  // send current data back
-  res.json(userDataNeeded)
-})
-
+  return User.update(
+    { username: data.username },
+    db_player,
+    { overwrite: true, upsert: true, multi: false },
+    (err, res) => {
+      console.log(res, err)
+    }
+  )
+}
 app.listen(3000, () => console.log("running on port 3000"))
