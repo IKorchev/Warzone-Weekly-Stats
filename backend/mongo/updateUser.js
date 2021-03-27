@@ -18,13 +18,18 @@ const updateUser = async (player, platform) => {
     }
     // create user in the database in
     // order to make a comparison later
-    return User.updateOne({ username: data.username }, db_player, {}, (err, res) => {
-      if (err) {
-        console.error(err)
-      } else {
-        console.log("user updated")
+    return User.updateOne(
+      { username: data.username },
+      db_player,
+      { upsert: true },
+      (err, res) => {
+        if (err) {
+          console.error(err)
+        } else {
+          console.log("user updated")
+        }
       }
-    })
+    )
   } catch (err) {
     console.error(err)
   }

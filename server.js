@@ -20,9 +20,11 @@ db.once("open", () => {
 app.post("/compare/:name", async (req, res) => {
   try {
     COD.login()
-    const player = req.params.name.split(",") //split name and platform
-    console.log(player)
-    const data = await COD.getData(player[0], player[1])
+    //split name and platform
+    const player = req.params.name.split(",")
+    const playerName = player[0].toLowerCase()
+    const platform = player[1]
+    const data = await COD.getData(playerName, platform)
     const ws = data.weekly.all.properties
     const cod_data = {
       username: data.username,
@@ -39,7 +41,7 @@ app.post("/compare/:name", async (req, res) => {
         res.json([cod_data, db_data]) // send both data from db and cod api
       } else {
         res.json([cod_data, cod_data]) // send only cod-api if there is no data in db
-        updateUser(player[0], player[1]) // add data to db
+        updateUser(playerName, platform) // add data to db
       }
     })
   } catch (err) {
@@ -51,12 +53,13 @@ app.post("/compare/:name", async (req, res) => {
 app.post("/update/:playername", async (req, res) => {
   try {
     const player = req.params.playername.split(",")
+    console.log(player)
+
     updateUser(player[0], player[1])
-    res.send("player data updated")
+    res.json("player data updated")
   } catch (err) {
-    res.send("unable to update")
+    res.json(err.message)
   }
 })
-
 
 app.listen(3000, () => console.log("running on port 3000"))

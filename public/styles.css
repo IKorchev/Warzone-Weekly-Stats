@@ -55,3 +55,10 @@ select:focus {
   box-shadow: none !important;
   outline: none !important;
 }
+.accordion-header:hover {
+  background-color: rgba(124, 124, 124, 0.2) !important;
+}
+#player-container {
+  color: rgba(255, 185, 8, 0.8) !important;
+  cursor: default;
+}

@@ -1,45 +1,46 @@
 // SELECTORS
 const form = document.querySelector("form")
-const playerName = document.querySelector("#username")
+const username = document.querySelector("#username")
 const compare = document.querySelector("#compare")
 const saveButton = document.querySelector("#save")
 const saveContainer = document.querySelector("#save-container")
+const spinner = document.querySelector("#spinner")
 const plat = document.querySelector("#plat")
 const weeklyStatsContainer = document.querySelector("#weekly-stats")
 const allTimeStatsContainer = document.querySelector("#all-time-stats")
 const playerContainer = document.querySelector("#player-container")
-const weeklyCollapse = document.getElementById("collapseOne")
-const accordion = document.querySelector(".accordion")
+const weeklyCollapse = document.querySelector("#collapseOne")
 const lastUpdated = document.querySelector("#last-updated")
-let platform = ""
-// collapsible
+const accordion = document.querySelector(".accordion")
 const collapse = new bootstrap.Collapse(weeklyCollapse, {
   toggle: false,
 })
+let playerName = ""
+let platform = ""
 // SPINNER HTML
 const spinnerHTML = `
-  <div class="spinner-border text-info mt-5" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>`
-
+  `
+// update database info
 saveButton.addEventListener("click", async (e) => {
+  console.log(playerName, platform)
   e.preventDefault()
-  // TODO: store user input in variables
-  const name = "aventus%2321742"
-  const platform = "battle"
-  const response = await fetch(`/update/${name.toLowerCase()},${platform}`, {
+  const response = await fetch(`/update/${playerName},${platform}`, {
     method: "POST",
   })
+  const data = await response.json()
+  console.log(data)
 })
+// form submission
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
   // send user info to server to make the api call
-  const name = playerName.value.toLowerCase().replace("#", "%23")
+  playerName = username.value.toLowerCase().replace("#", "%23")
   platform = plat.value
-  playerContainer.innerHTML = spinnerHTML
+  console.log(playerName, platform)
+  spinner.classList.remove("visually-hidden")
   try {
     // FETCH DATA FROM API
-    const res = await fetch(`/compare/${name},${platform}`, { method: "POST" })
+    const res = await fetch(`/compare/${playerName},${platform}`, { method: "POST" })
     const data = await res.json()
     const coddata = data[0]
     const dbdata = data[1]
@@ -50,6 +51,7 @@ form.addEventListener("submit", async (e) => {
     form.reset()
   }
 })
+
 // determine what color the number should be based on stats (green - better, red - worse)
 const chooseColor = (num1, num2) => {
   let info = {}
@@ -67,9 +69,9 @@ const chooseColor = (num1, num2) => {
   }
 }
 
+//prettier-ignore
 // format data and make cards
 const makeComparisonCards = (cod, db) => {
-  //prettier-ignore
   if(cod, db) {
     const codStats = [
       {
@@ -127,7 +129,7 @@ const makeComparisonCards = (cod, db) => {
 const setUserHtml = (user) => {
   if(Object.keys(user) != 0) {
  return `<h5 class="player text-center border border-info text-uppercase"><i class="bi bi-person"></i>${user.username}</h5>
-  <h5 class="player text-center border border-info"><i class="bi bi-trophy"></i> Wins: ${user.wins.toLocaleString("en-UK") || 0} </h5>`
+  <h6 class="player text-center border border-info"><i class="bi bi-trophy"></i> Wins this week: ${user.wins.toLocaleString("en-UK") || 0} </h6>`
 } else {
   return `<div class="alert alert-danger mt-5 mx-auto">
       <h5 class="text-center ">Unable to find user <br> (misconfigured privacy settings)</h5>
@@ -154,8 +156,8 @@ const setupUI = (cod_data, db_data) => {
     lastUpdated.textContent = makeDate(db_data.updatedAt)
     accordion.classList.remove("visually-hidden")
     saveContainer.classList.remove("visually-hidden")
-    allTimeStatsContainer.innerHTML = makeComparisonCards(db_data, cod_data)
-    weeklyStatsContainer.innerHTML = makeComparisonCards(cod_data, db_data)
+    weeklyStatsContainer.innerHTML = makeComparisonCards(db_data, cod_data)
+    allTimeStatsContainer.innerHTML = makeComparisonCards(cod_data, db_data)
     playerContainer.innerHTML = setUserHtml(playerInfo)
     collapse.show()
   } else {
