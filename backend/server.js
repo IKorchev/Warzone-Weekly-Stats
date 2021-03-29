@@ -22,10 +22,9 @@ db.once("open", () => {
   console.log("we are connected")
 })
 
-COD.login()
 app.post("/search/:name", async (req, res) => {
+  COD.login()
   try {
-    COD.login()
     //split name and platform
     const playerInfo = req.params.name.split(",")
     const playerName = playerInfo[0].toLowerCase()
