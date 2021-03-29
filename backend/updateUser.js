@@ -1,10 +1,10 @@
-const COD = require("./cod")
+const { codLogin, getData } = require("./cod")
 const Player = require("./Player")
 const User = require("./schema")
 
 const updateUser = async (name, platform) => {
-  await COD.login()
-  const data = await COD.getData(name, platform)
+  await codLogin()
+  const data = await getData(name, platform)
   if (data != undefined) {
     const player = new Player(data)
 

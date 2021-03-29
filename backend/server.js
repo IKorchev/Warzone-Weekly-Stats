@@ -2,7 +2,7 @@ require("dotenv").config()
 const { urlencoded } = require("express")
 const express = require("express")
 const app = express()
-const COD = require("./cod")
+const { codLogin, getData } = require("./cod")
 const User = require("./schema")
 const db = require("./mongo")
 const updateUser = require("./updateUser")
@@ -19,16 +19,15 @@ app.use(express.json())
 // mongodb
 db.on("error", (err) => console.log(err + " couldnt connect"))
 db.once("open", () => {
-  console.log("we are connected")
+  console.log("mongodb connected")
 })
 
 app.post("/search/:name", async (req, res) => {
   try {
-    await COD.login()
     const playerInfo = req.params.name.split(",")
     const playerName = playerInfo[0].toLowerCase()
     const platform = playerInfo[1]
-    const data = await COD.getData(playerName, platform)
+    const data = await getData(playerName, platform)
     const player = new Player(data)
     // check if player is in the database
     User.findOne({ username: player.username }, (err, db_data) => {
@@ -61,4 +60,7 @@ app.post("/update/:playername", async (req, res) => {
   }
 })
 
-app.listen(PORT, () => console.log(`running on port ${PORT}`))
+app.listen(PORT, async () => {
+  await codLogin()
+  console.log(`running on port ${PORT}`)
+})
