@@ -1,4 +1,4 @@
-const dotenv = require("dotenv")
+require("dotenv").config()
 const { urlencoded } = require("express")
 const express = require("express")
 const app = express()
@@ -10,7 +10,6 @@ const Player = require("./Player")
 const path = require("path")
 const publicPath = path.join(__dirname, "../public")
 const PORT = process.env.PORT || 3000
-dotenv.config()
 
 // middleware
 app.use(express.static(publicPath))
