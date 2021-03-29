@@ -1,10 +1,9 @@
+require("dotenv").config()
 const API = require("call-of-duty-api")()
 // log in to call-of-duty
-const login = async (email, password) => {
+const login = async () => {
   try {
-    let login = await API.login(email, password)
-    console.log(login)
-    return login
+    await API.login(process.env.EMAIL, process.env.PASSWORD)
   } catch (err) {
     console.log(err)
   }
