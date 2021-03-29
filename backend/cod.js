@@ -1,9 +1,11 @@
 require("dotenv").config()
 const API = require("call-of-duty-api")()
+const email = process.env.EMAIL
+const password = process.env.PASSWORD
 // log in to call-of-duty
 const codLogin = async () => {
   try {
-    await API.login(process.env.EMAIL, process.env.PASSWORD)
+    await API.login(email, password)
     let data = await API.isLoggedIn()
     console.log(`User logged in - ${data}`)
   } catch (err) {

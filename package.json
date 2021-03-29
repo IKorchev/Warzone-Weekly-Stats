@@ -1,11 +1,10 @@
 {
-  "name": "cod",
+  "name": "WZStatsTracker",
   "version": "1.0.0",
-  "description": "",
+  "description": "App that tracks player stats in the game COD: Warzone",
   "main": "index.js",
   "scripts": {
-    "start": "node ./backend/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./backend/server.js"
   },
   "keywords": [],
   "author": "",
