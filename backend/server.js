@@ -21,7 +21,10 @@ db.on("error", (err) => console.log(err + " couldnt connect"))
 db.once("open", () => {
   console.log("we are connected")
 })
-
+;(() => {
+  COD.login(process.env.EMAIL, process.env.PASSWORD)
+  console.log("logged in")
+})()
 app.post("/search/:name", async (req, res) => {
   try {
     COD.login()
