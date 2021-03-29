@@ -3,7 +3,7 @@ const Player = require("./Player")
 const User = require("./schema")
 
 const updateUser = async (name, platform) => {
-  COD.login()
+  await COD.login()
   const data = await COD.getData(name, platform)
   if (data != undefined) {
     const player = new Player(data)
@@ -21,7 +21,7 @@ const updateUser = async (name, platform) => {
       }
     )
   }
-  return undefined
+  return "no data found"
 }
 
 module.exports = updateUser

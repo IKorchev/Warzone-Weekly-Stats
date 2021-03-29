@@ -23,9 +23,8 @@ db.once("open", () => {
 })
 
 app.post("/search/:name", async (req, res) => {
-  COD.login()
   try {
-    //split name and platform
+    await COD.login()
     const playerInfo = req.params.name.split(",")
     const playerName = playerInfo[0].toLowerCase()
     const platform = playerInfo[1]
