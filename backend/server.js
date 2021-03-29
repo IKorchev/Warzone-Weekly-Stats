@@ -23,7 +23,6 @@ db.once("open", () => {
 })
 
 COD.login()
-
 app.post("/search/:name", async (req, res) => {
   try {
     COD.login()

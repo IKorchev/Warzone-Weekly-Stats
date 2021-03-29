@@ -3,7 +3,9 @@ const API = require("call-of-duty-api")()
 // log in to call-of-duty
 const login = async () => {
   try {
-    await API.login(process.env.EMAIL, process.env.PASSWORD)
+    await API.login(process.env.EMAIL, process.env.PASSWORD).then(() =>
+      console.log("logged in")
+    )
   } catch (err) {
     console.log(err)
   }
