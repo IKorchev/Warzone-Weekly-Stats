@@ -11,7 +11,6 @@ const path = require("path")
 const publicPath = path.join(__dirname, "../public")
 const PORT = process.env.PORT || 3000
 dotenv.config()
-COD.login() // log in to COD API
 
 // middleware
 app.use(express.static(publicPath))
@@ -19,7 +18,7 @@ app.use(urlencoded({ extended: false }))
 app.use(express.json())
 
 // mongodb
-db.on("error", () => console.log("couldnt connect"))
+db.on("error", (err) => console.log(err + " couldnt connect"))
 db.once("open", () => {
   console.log("we are connected")
 })
