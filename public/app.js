@@ -1,56 +1,21 @@
 // SELECTORS
 const form = document.querySelector("form")
 const username = document.querySelector("#username")
-const compare = document.querySelector("#compare")
+const playerNotFoundAlert = document.querySelector("#alert")
+const summary = document.querySelector("#summary")
 const saveButton = document.querySelector("#save")
 const saveContainer = document.querySelector("#save-container")
 const spinner = document.querySelector("#spinner")
-const plat = document.querySelector("#plat")
-const weeklyStatsContainer = document.querySelector("#weekly-stats")
-const allTimeStatsContainer = document.querySelector("#all-time-stats")
+const platform = document.querySelector("#plat")
+const currentStatsContainer = document.querySelector("#current-stats")
+const previousStatsContainer = document.querySelector("#previous-stats")
 const playerContainer = document.querySelector("#player-container")
-const weeklyCollapse = document.querySelector("#collapseOne")
 const lastUpdated = document.querySelector("#last-updated")
 const accordion = document.querySelector(".accordion")
-const collapse = new bootstrap.Collapse(weeklyCollapse, {
-  toggle: false,
-})
+const playerFoundElements = document.querySelectorAll(".player-found")
 let playerName = ""
-let platform = ""
-// SPINNER HTML
-const spinnerHTML = `
-  `
+let platformValue = ""
 // update database info
-saveButton.addEventListener("click", async (e) => {
-  console.log(playerName, platform)
-  e.preventDefault()
-  const response = await fetch(`/update/${playerName},${platform}`, {
-    method: "POST",
-  })
-  const data = await response.json()
-  console.log(data)
-})
-// form submission
-form.addEventListener("submit", async (e) => {
-  e.preventDefault()
-  // send user info to server to make the api call
-  playerName = username.value.toLowerCase().replace("#", "%23")
-  platform = plat.value
-  console.log(playerName, platform)
-  spinner.classList.remove("visually-hidden")
-  try {
-    // FETCH DATA FROM API
-    const res = await fetch(`/compare/${playerName},${platform}`, { method: "POST" })
-    const data = await res.json()
-    const coddata = data[0]
-    const dbdata = data[1]
-    setupUI(coddata, dbdata) // set up the ui
-  } catch (err) {
-    setupUI() // set up the ui
-  } finally {
-    form.reset()
-  }
-})
 
 // determine what color the number should be based on stats (green - better, red - worse)
 const chooseColor = (num1, num2) => {
@@ -70,100 +35,155 @@ const chooseColor = (num1, num2) => {
 }
 
 //prettier-ignore
-// format data and make cards
-const makeComparisonCards = (cod, db) => {
-  if(cod, db) {
-    const codStats = [
-      {
-        name: "Kills",
-        number: db.kills,
-        info: chooseColor(db.kills, cod.kills),
-      },
-      {
-        name: "Deaths",
-        number: db.deaths,
-        info: chooseColor(cod.deaths, db.deaths), // has to be reverse cuz the color indicates less deaths(meaning better performance of the player)
-      },
-      {
-        name: "Assists",
-        number: db.assists,
-        info: chooseColor(db.assists, cod.assists),
-      },
-      {
-        name: "KD Ratio",
-        number: db.kdRatio.toFixed(2),
-        info: chooseColor(db.kdRatio, cod.kdRatio),
-      },
-      {
-        name: "Games Played",
-        number: db.matchesPlayed,
-        info: chooseColor(db.matchesPlayed, cod.matchesPlayed),
-      },
-      { name: "Wins",
-        number: db.wins || 0,
-        info: chooseColor(db.wins, cod.wins || 0) 
-      },
-      {
-        name: "Time played",
-        number: parseInt((db.timePlayed / 3600).toFixed(2)) + "hours",
-        info: chooseColor(db.timePlayed, cod.timePlayed),
-      },
-    ]
 
-    let html = ""
-    codStats.forEach((object) => {
-      const color = object.info.color
-      const icon = object.info.icon
-      html += `<div class="col-sm-3 my-3 text-center"><h5>${object.name}</h5>
-      <h5 class="${color}">${object.number} <i class="bi ${icon}"></i></h5>
-      </div>`
-    })
-  
-    return `<div class="row gx-0 justify-content-center align-items-center">${html}</div>`
-}
-  return `<h5> Couldn't find enough data </h5>`
+// Make objects from data and return cards
+const createCardsWithData = (cod, db) =>{ 
+  console.log(cod,db)
+  const arrayOfObjects = [
+  {
+    name: "Kills",
+    number: db.kills,
+  },
+  {
+    name: "Deaths",
+    number: db.deaths,
+  },
+  {
+    name: "Assists",
+    number: db.assists,
+  },
+  {
+    name: "KD Ratio",
+    number: db.kdRatio.toFixed(2),
+  },
+  {
+    name: "Games Played",
+    number: db.matchesPlayed,
+  },
+  { name: "Wins",
+    number: db.wins || 0,
+  },
+  {
+    name: "Time played",
+    number: db.timePlayed.toFixed() + " hours",
+  },
+]
+return makeCards(arrayOfObjects)
 }
 
-// Show user or alert
-// prettier-ignore
-const setUserHtml = (user) => {
-  if(Object.keys(user) != 0) {
- return `<h5 class="player text-center border border-info text-uppercase"><i class="bi bi-person"></i>${user.username}</h5>
-  <h6 class="player text-center border border-info"><i class="bi bi-trophy"></i> Wins this week: ${user.wins.toLocaleString("en-UK") || 0} </h6>`
-} else {
-  return `<div class="alert alert-danger mt-5 mx-auto">
-      <h5 class="text-center ">Unable to find user <br> (misconfigured privacy settings)</h5>
+// make html cards for dom from objects
+const makeCards = (arrayOfObjects) => {
+  //if no data found
+  if (arrayOfObjects.length === 0) {
+    return `<h5> Couldn't find enough data </h5>`
+  }
+  let html = ""
+  arrayOfObjects.forEach((object) => {
+    html += `
+    <div class="col-sm-3 m-1 text-center border border-info p-2"><h6>${object.name}</h6>
+      <h5 class="">${object.number} <i class="bi"></i></h5>
     </div>`
-}}
+  })
+  return `<div class="row gx-0 justify-content-center align-items-center">${html}</div>`
+}
+
+// choose color based on stats difference (better or worse performance)
+const textColor = (c, d) => {
+  if (c > d) {
+    return "text-success"
+  }
+  if (c < d) {
+    return "text-danger"
+  }
+  return ""
+}
+
+//prettier-ignore
+//create a summary string
+const makeResultsSummaryString = (coddata, dbdata) => {
+  
+}
 
 // Format timestamp from database
 const makeDate = (dateStr) => {
   if (dateStr) {
     let date = new Date(dateStr)
-    return `${date.toTimeString().slice(0, 8)} | ${date.toLocaleDateString()}`
+    return `${date.toLocaleDateString()} ${date.toTimeString().slice(0, 8)}`
   }
   return "Now"
 }
 
+// update data in database
+saveButton.addEventListener("click", async (e) => {
+  e.preventDefault()
+  const response = await fetch(`/update/${playerName},${platformValue}`, {
+    method: "POST",
+  })
+  if (response.status === 200) {
+    document.querySelector("#successful-update").classList.remove("visually-hidden")
+    setTimeout(() => {
+      document.querySelector("#successful-update").classList.add("visually-hidden")
+    }, 3500)
+  }
+})
+
+// form submission
+form.addEventListener("submit", async (e) => {
+  e.preventDefault()
+  // send user info to server to make the api call
+  playerName = username.value.toLowerCase().replace("#", "%23")
+  platformValue = platform.value
+  playerNotFoundAlert.classList.add("visually-hidden")
+  spinner.classList.remove("visually-hidden")
+  try {
+    // FETCH DATA FROM API
+    const res = await fetch(`/search/${playerName},${platformValue}`, { method: "POST" })
+    const data = await res.json()
+    const coddata = data[0]
+    const dbdata = data[1]
+    setupUI(coddata, dbdata) // set up the ui
+  } catch (err) {
+    setupUI() // set up the ui
+  } finally {
+    form.reset()
+  }
+})
+
+// Show user or alert
+//prettier-ignore
+const setUserSummaryHtml = (coddata, dbdata) => {
+  let html = ""
+  if (coddata && dbdata) {
+      document.querySelector('#player-name').innerHTML = coddata.username
+      document.querySelector('#player-wins').innerHTML = `WINS: ${coddata.wins}`
+      const c = coddata
+      const d = dbdata
+      html = `
+      Since the last stats update <b class="text-uppercase">${c.username}</b> played ${c.matchesPlayed - d.matchesPlayed}
+      games (${c.timePlayed.toFixed(2) - d.timePlayed.toFixed(2)} hours)<br>
+      They have <b class="${textColor(c.kills, d.kills)}"> ${c.kills - d.kills}</b> more kills,
+      <span class="${textColor(c.deaths, d.deaths)}">${d.deaths - c.deaths}</span> more deaths
+      and ${c.assists - d.assists} more assists. Their KD Ratio last time was <b>${d.kdRatio.toFixed(2)}</b>, 
+      now it is <b class="${textColor(c.kdRatio, d.kdRatio)}">${c.kdRatio.toFixed(2)}</b>. <br>
+      See full stats below.`
+      return html
+  }
+ return
+}
+
 // UI
 const setupUI = (cod_data, db_data) => {
-  let playerInfo = {}
   if (cod_data && db_data) {
-    playerInfo = {
-      username: cod_data.username,
-      wins: cod_data.wins,
-    }
+    playerFoundElements.forEach((el) => el.classList.remove("visually-hidden"))
+    spinner.classList.add("visually-hidden")
     lastUpdated.textContent = makeDate(db_data.updatedAt)
-    accordion.classList.remove("visually-hidden")
-    saveContainer.classList.remove("visually-hidden")
-    weeklyStatsContainer.innerHTML = makeComparisonCards(db_data, cod_data)
-    allTimeStatsContainer.innerHTML = makeComparisonCards(cod_data, db_data)
-    playerContainer.innerHTML = setUserHtml(playerInfo)
-    collapse.show()
+    previousStatsContainer.innerHTML = createCardsWithData(db_data, cod_data)
+    currentStatsContainer.innerHTML = createCardsWithData(cod_data, db_data)
+    summary.innerHTML = setUserSummaryHtml(cod_data, db_data)
   } else {
-    accordion.classList.add("visually-hidden")
-    saveContainer.classList.add("visually-hidden")
-    playerContainer.innerHTML = setUserHtml(playerInfo)
-    collapse.hide()
+    playerFoundElements.forEach((el) => el.classList.add("visually-hidden"))
+    spinner.classList.add("visually-hidden")
+    playerNotFoundAlert.classList.remove("visually-hidden")
+    summary.innerHTML = setUserSummaryHtml()
   }
 }

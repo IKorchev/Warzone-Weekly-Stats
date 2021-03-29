@@ -1,6 +1,7 @@
 :root {
   --color-blue: lightblue;
   --color-dark: rgb(109, 109, 109);
+  --color-gold: #f2d9bb;
 }
 
 .content-container {
@@ -10,7 +11,9 @@
 .alert {
   max-width: 500px;
 }
-
+h1 {
+  font-family: "Roboto", sans-serif;
+}
 .accordion-button:focus {
   background-color: none !important;
   box-shadow: none !important;
@@ -35,18 +38,13 @@
   max-width: 200px;
   height: 100px;
 }
-.player {
-  max-width: 220px;
-  padding: 20px;
-  margin: 10px 20px;
-}
+
 .name {
   text-transform: uppercase;
 }
 input,
 button,
-select,
-.input-group-text {
+select {
   border-radius: 0px !important;
   border-color: lightblue !important;
 }
@@ -55,10 +53,19 @@ select:focus {
   box-shadow: none !important;
   outline: none !important;
 }
+option {
+  margin: 20px !important;
+  color: black;
+  background: lightblue !important;
+}
 .accordion-header:hover {
   background-color: rgba(124, 124, 124, 0.2) !important;
 }
+.accordion-body,
+.card {
+  background-color: rgba(36, 27, 27, 0.2) !important;
+}
 #player-container {
-  color: rgba(255, 185, 8, 0.8) !important;
+  color: var(--color-gold) !important;
   cursor: default;
 }

@@ -13,91 +13,113 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <title>COD Stats Tracker</title>
 </head>
 
 <body class="bg-dark">
-    <h1 class="text-center text-light my-5">Warzone Stats</h1>
-    <h2 class="h4 text-light text-center mb-4">Search for a player:</h2>
-    <div class="container mx-auto">
-        <form class="d-flex flex-column flex-lg-row justify-content-center mx-auto" method="POST">
-            <div class="col-lg-4 d-flex justify-content-center">
-                <input type="text" class="form-control text-white bg-dark" name="name" id="username"
-                    placeholder="Username (include # and numbers)" aria-label="Username">
-            </div>
-            <div class="col-lg-1 d-flex justify-content-center">
-                <select class="form-select text-white bg-dark text-white" name="platform" id="plat">
-                    <option value="battle">Battle.net</option>
-                    <option value="psn">Playstation</option>
-                    <option value="steam">Steam</option>
-                    <option value="xbl">Xbox Live</option>
-                    <option value="acti">Activision</option>
-                </select>
-            </div>
-            <div class="col-lg-2  justify-content-center">
-                <button class="btn btn-secondary d-block w-100" type="submit"><i class="bi bi-search"></i>
-                    Search</button>
-            </div>
-        </form>
-    </div>
-    <div class="row w-50 mx-auto gx-0 mt-5 justify-content-center align-items-center text-white" id="player-container">
-        <div class="spinner-border text-info mt-5 visually-hidden" id="spinner" role="status">
-            <span class="visually-hidden">Loading...</span>
+    <div>
+        <header class="container my-5">
+            <h1 class="text-center text-light mt-5 px-3">Track your Call Of Duty: Warzone stats!</h1>
+            <h3 class="text-center text-light my-3">Save your stats and compare later!</h3>
+        </header>
+        <div class="container mt-4 mx-auto">
+            <form class="d-flex flex-column flex-lg-row justify-content-center mx-auto" method="POST">
+                <div class="col-lg-4 d-flex justify-content-center">
+                    <input type="text" class="form-control text-white bg-dark p-3" name="name" id="username"
+                        placeholder="Username (include # and numbers)" aria-label="Username">
+                </div>
+                <div class="col-lg-2 d-flex justify-content-center">
+                    <select class="form-select form-select-lg text-white bg-dark text-white" name="platform" id="plat">
+                        <option value="battle">Battle.net</option>
+                        <option value="psn">Playstation</option>
+                        <option value="steam">Steam</option>
+                        <option value="xbl">Xbox Live</option>
+                        <option value="acti">Activision</option>
+                    </select>
+                </div>
+                <div class="col-lg-1  justify-content-center">
+                    <button class="btn btn-secondary d-block w-100 h-100" type="submit"><i class="bi bi-search"></i>
+                        Search</button>
+                </div>
+            </form>
         </div>
-    </div>
-
-    <div class="container content-container d-flex justify-content-center mt-5">
-        <div class="accordion w-100 visually-hidden" id="an-accordion">
-            <div class="accordion-item">
-                <h2 class="accordion-header bg-dark " id="headingTwo">
-                    <button class="accordion-button text-white collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        <h5>Previous stats</h5>
-                    </button>
-                </h2>
-                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                    data-bs-parent="#an-accordion">
-                    <div class="accordion-body text-white">
-                        <div class="card">
-                            <div class="card-header my-3 d-flex justify-content-between">
-                                <h5>Stats since last updated:</h5>
-                                <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <small>Last updated:</small>
-                                    <small class="text-center" id="last-updated"></small>
+        <div class="container-lg mx-auto mt-5 visually-hidden player-found" id="player-container">
+            <div class="px-3 py-4 border-bottom border-info d-lg-flex justify-content-center align-items-center">
+                <h4 class="text-center text-uppercase text-break pb-2 m-2" id="player-name">
+                </h4>
+                <h4 class="text-center m-2 pb-2" id="player-wins"><i class="bi bi-trophy"></i></h4>
+            </div>
+            <div>
+                <h5 class="text-center mt-4">SUMMARY</h5>
+                <p class="lead text-white text-center" id="summary"></p>
+            </div>
+        </div>
+        <div class="container d-flex justify-content-center">
+            <div class="alert alert-danger mt-5 mx-auto visually-hidden" id="alert">
+                <h5 class="text-center ">Unable to find player <br> (misconfigured privacy settings)</h5>
+            </div>
+            <div class="spinner-border text-info text-center mt-5 mx-auto visually-hidden" id="spinner" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div class="container content-container d-flex justify-content-center mt-5 ">
+            <div class="accordion w-100 visually-hidden player-found" id="an-accordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header bg-dark" id="headingOne">
+                        <button class="accordion-button text-white collapsed d-block" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false"
+                            aria-controls="collapseOne">
+                            <h6>Player stats as of now</h6>
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                        data-bs-parent="#an-accordion">
+                        <div class="accordion-body text-white">
+                            <div class="card">
+                                <div class="card-header my-3 mx-auto">
+                                    <h5>Current stats</h5>
+                                </div>
+                                <div class="p-1" id="current-stats">
+                                    <!-- Weekly stats go here -->
                                 </div>
                             </div>
-                            <div id="all-time-stats">
-                                <!-- All time stats go here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header bg-dark" id="headingTwo">
+                        <button class="accordion-button text-white collapsed d-flex justify-content-between"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
+                            aria-controls="collapseTwo">
+                            <h6>Player stats on <span id="last-updated"></span> (last updated)</h6>
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                        data-bs-parent="#an-accordion">
+                        <div class="accordion-body text-white">
+                            <div class="card">
+                                <div class="card-header my-3 mx-auto">
+                                    <h5>Stats since last updated</h5>
+                                </div>
+                                <div class="p-1" id="previous-stats">
+                                    <!-- All time stats go here -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header bg-dark" id="headingOne">
-                    <button class="accordion-button text-white d-block" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        <h5>Current stats</h5>
-                    </button>
-                </h2>
-                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-                    data-bs-parent="#an-accordion">
-                    <div class="accordion-body text-white">
-                        <div class="card">
-                            <div class="card-header my-3 d-flex justify-content-around">
-                                <h5>You now have</h5>
-                            </div>
-                            <div id="weekly-stats">
-                                <!-- Weekly stats go here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
-    </div>
-    <div class="container d-flex justify-content-center my-5 visually-hidden" id="save-container">
-        <button class="btn btn-secondary" id="save">Update stats</button>
+        <div class="container d-flex flex-column justify-content-center my-5 visually-hidden player-found"
+            id="save-container">
+            <div class="alert alert-success  mx-auto visually-hidden" id="successful-update" role="alert">
+                Stats updated successfully!
+            </div>
+            <button class="btn btn-secondary  mx-auto" id="save">Update stats</button>
+        </div>
     </div>
 </body>
 <script src="app.js"></script>
