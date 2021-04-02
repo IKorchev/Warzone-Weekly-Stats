@@ -159,12 +159,15 @@ const setUserSummaryHtml = (coddata, dbdata) => {
       const c = coddata
       const d = dbdata
       html = `
-      Since the last stats update <b class="text-uppercase">${c.username}</b> played ${c.matchesPlayed - d.matchesPlayed}
-      games (${c.timePlayed.toFixed(2) - d.timePlayed.toFixed(2)} hours)<br>
-      They have <b class="${textColor(c.kills, d.kills)}"> ${c.kills - d.kills}</b> more kills,
-      <span class="${textColor(c.deaths, d.deaths)}">${d.deaths - c.deaths}</span> more deaths
-      and ${c.assists - d.assists} more assists. Their KD Ratio last time was <b>${d.kdRatio.toFixed(2)}</b>, 
-      now it is <b class="${textColor(c.kdRatio, d.kdRatio)}">${c.kdRatio.toFixed(2)}</b>. <br>
+      Since the last stats update
+      <span class="text-uppercase fw-bold">${c.username}</span> played ${c.matchesPlayed - d.matchesPlayed} games (${c.timePlayed.toFixed(2) - d.timePlayed.toFixed(2)} hours)<br> They have 
+      <span class="fw-bold  ${textColor(c.kills, d.kills)}"> ${c.kills - d.kills}</span> more kills,
+      <span class="fw-bold  ${textColor(c.deaths, d.deaths)}"></span>
+      <span class="fw-bold  ${textColor(d.deaths, c.deaths)}">${c.deaths - d.deaths}</span> more deaths and
+      <span class="fw-bold">${c.assists - d.assists}</span> more assists. Their KD Ratio last time was
+      <span class="fw-bold">${d.kdRatio.toFixed(2)}</span>, now it is
+      <span class="fw-bold  ${textColor(c.kdRatio, d.kdRatio)}">${c.kdRatio.toFixed(2)}</span>.
+      <br>
       See full stats below.`
       return html
   }
